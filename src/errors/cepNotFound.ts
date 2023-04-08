@@ -1,8 +1,8 @@
 
-export function cepNotFound(): {name:string,status:Number,message:string} {
+export function cepNotFound(status:number): {name:string,status:number,message:string} {
   return {
     name: 'NotFoundError',
-    status: 204,
+    status,
     message:"No address for this cep, check if cep is spelled correctly."
   };
 }

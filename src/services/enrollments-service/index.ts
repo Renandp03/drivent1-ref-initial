@@ -10,13 +10,12 @@ async function getAddressFromCEP(cep:any) {
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
   console.log(result)
   
-  if (!result.data || result.data.erro) {
-    throw cepNotFound();
-  }
+  if (!result.data) throw cepNotFound(204);
+  else if(result.data.erro) throw cepNotFound(400);
 
-  const {logradouro,complemento,bairro,cidade,uf} = result.data
+  const {logradouro,complemento,bairro,localidade,uf} = result.data
 
-  return {logradouro,complemento,bairro,cidade,uf};
+  return {logradouro,complemento,bairro,cidade:localidade,uf};
 }
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
@@ -49,8 +48,8 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
 
   try {
     await getAddressFromCEP(address.cep);
-  } catch {
-    throw invalidDataError(['invalid CEP']);
+  } catch(error) {
+    throw error;
   }
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
